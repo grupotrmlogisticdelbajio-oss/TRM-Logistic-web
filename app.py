@@ -574,7 +574,7 @@ def generar_pdf_cotizacion(
     """
 
   pdf_bytes = HTML(string=html_content).write_pdf()
-        return pdf_bytes
+  return pdf_bytes
 
 pdf_data = generar_pdf_cotizacion(
     folio=folio_str,
