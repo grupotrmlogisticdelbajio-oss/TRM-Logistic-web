@@ -185,14 +185,14 @@ iva = subtotal * 0.16
 retencion_iva = subtotal * 0.04
 total_neto = subtotal + iva - retencion_iva
 
-    st.markdown("---")
-    st.header("2. Desglose de Cotización")
-    st.write(f"**Ruta Detectada:** {ruta_sel} | Costo Base: ${costo_base_ruta:,.2f} | Distancia Base: {distancia_base:,.1f} km")
-    st.write(f"**Unidad Detectada:** {unidad_sel} | Mult Flete: {mult_flete} | Rendimiento: {rendimiento}")
-    st.write(f"**SUBTOTAL APLICADO:** ${subtotal:,.2f}")
-    st.write(f"**IVA (16%):** ${iva:,.2f}")
-    st.write(f"**IVA de retención (4%):** ${retencion_iva:,.2f}")
-    st.write(f"**TOTAL NETO:** ${total_neto:,.2f}")
+st.markdown("---")
+st.header("2. Desglose de Cotización")
+st.write(f"**Ruta Detectada:** {ruta_sel} | Costo Base: ${costo_base_ruta:,.2f} | Distancia Base: {distancia_base:,.1f} km")
+st.write(f"**Unidad Detectada:** {unidad_sel} | Mult Flete: {mult_flete} | Rendimiento: {rendimiento}")
+st.write(f"**SUBTOTAL APLICADO:** ${subtotal:,.2f}")
+st.write(f"**IVA (16%):** ${iva:,.2f}")
+st.write(f"**IVA de retención (4%):** ${retencion_iva:,.2f}")
+st.write(f"**TOTAL NETO:** ${total_neto:,.2f}")
 
 with col_der:
     st.header("📍 Visualización de Ruta")
