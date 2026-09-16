@@ -135,6 +135,8 @@ with col_izq:
     combustible_ida_vuelta = st.radio("Combustible y caseta ida y vuelta:", ["Sí", "No"], index=0, key="trm_iv")
     gastos_operativos = 1500.0
 
+    tipo_viaje = st.radio("Tipo de Viaje:", ["Sencillo", "Redondo"], key="trm_tipo_viaje")
+
     precio_manual = st.number_input("PRECIO MANUAL (OPCIONAL) ($):", value=0.0, step=100.0, format="%.2f", key="trm_precio_manual")
 
     # Separar origen y destino de la ruta de manera limpia
