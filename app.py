@@ -573,9 +573,8 @@ def generar_pdf_cotizacion(
     </html>
     """
 
-  output_pdf = "cotizacion_grupo_trm.pdf"
-  HTML(string=html_content).write_pdf(output_pdf)
-  return output_pdf
+  pdf_bytes = HTML(string=html_content).write_pdf()
+        return pdf_bytes
 
 pdf_data = generar_pdf_cotizacion(
     folio=folio_str,
