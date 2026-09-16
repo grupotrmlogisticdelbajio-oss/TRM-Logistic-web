@@ -576,7 +576,21 @@ def generar_pdf_cotizacion(
   HTML(string=html_content).write_pdf(output_pdf)
   return output_pdf
 
-pdf_data = generar_pdf()
+pdf_data = generar_pdf_cotizacion(
+    folio=folio_str,
+    fecha=fecha_actual,
+    cliente=cliente_empresa,
+    contacto=cliente_contacto,
+    correo=cliente_correo,
+    validez="7 Días Naturales",
+    ruta_sel=ruta_sel,
+    unidad_sel=unidad_sel,
+    subtotal=subtotal,
+    iva=iva,
+    retencion_iva=retencion_iva,
+    total_neto=total_neto,
+    tipo_viaje=tipo_viaje,
+)
 
 # Botones de Acción
 col_b1, col_b2, col_b3 = st.columns(3)
