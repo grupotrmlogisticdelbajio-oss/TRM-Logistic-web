@@ -220,21 +220,361 @@ with col_f2:
     st.write(f"**Total Neto (con IVA y Retención):** ${total_neto:,.2f}")
 
 # Función para generar PDF en memoria
-def generar_pdf():
-    buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
-    p.drawString(50, 750, "GRUPO TRM LOGISTIC - COTIZACIÓN DE FLETE")
-    p.drawString(50, 730, f"Folio: {folio_str} | Fecha: {fecha_actual}")
-    p.drawString(50, 700, f"Cliente: {cliente_empresa} - Atención: {cliente_contacto}")
-    p.drawString(50, 680, f"Ruta: {ruta_sel} | Unidad: {unidad_sel}")
-    p.drawString(50, 650, f"Subtotal: ${subtotal:,.2f}")
-    p.drawString(50, 630, f"IVA (16%): ${iva:,.2f}")
-    p.drawString(50, 610, f"Retención IVA (4%): ${retencion_iva:,.2f}")
-    p.drawString(50, 590, f"TOTAL NETO: ${total_neto:,.2f}")
-    p.showPage()
-    p.save()
-    buffer.seek(0)
-    return buffer.getvalue()
+def generar_pdf_cotizacion(
+    folio,
+    fecha,
+    cliente,
+    contacto,
+    correo,
+    validez,
+    ruta_sel,
+    unidad_sel,
+    subtotal,
+    iva,
+    retencion_iva,
+    total_neto,
+    tipo_viaje,
+):
+  html_content = f"""<!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            @page {{
+                size: A4 landscape;
+                margin: 10mm 12mm;
+                background-color: #ffffff;
+            }}
+            * {{
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }}
+            body {{
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                color: #222;
+                font-size: 11pt;
+                line-height: 1.3;
+            }}
+            .header-container {{
+                display: table;
+                width: 100%;
+                border-bottom: 2px solid #1a365d;
+                padding-bottom: 10px;
+                margin-bottom: 12px;
+            }}
+            .header-left {{
+                display: table-cell;
+                width: 40%;
+                vertical-align: middle;
+            }}
+            .company-title {{
+                font-size: 18pt;
+                font-weight: bold;
+                color: #1a365d;
+                letter-spacing: 0.5px;
+            }}
+            .company-subtitle {{
+                font-size: 9pt;
+                color: #555;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-top: 3px;
+            }}
+            .header-center {{
+                display: table-cell;
+                width: 25%;
+                text-align: center;
+                vertical-align: middle;
+            }}
+            .logo-box {{
+                font-size: 16pt;
+                font-weight: 900;
+                color: #d97706;
+                letter-spacing: 1px;
+            }}
+            .logo-sub {{
+                font-size: 6.5pt;
+                color: #555;
+                text-transform: uppercase;
+            }}
+            .header-right {{
+                display: table-cell;
+                width: 35%;
+                text-align: right;
+                vertical-align: middle;
+            }}
+            .cotizacion-title {{
+                font-size: 18pt;
+                font-weight: bold;
+                color: #1a365d;
+                text-transform: uppercase;
+            }}
+            .meta-table {{
+                width: 100%;
+                font-size: 9pt;
+                margin-top: 4px;
+            }}
+            .meta-table td {{
+                padding: 1px 0;
+            }}
+            .meta-label {{
+                text-align: right;
+                color: #555;
+                padding-right: 8px;
+            }}
+            .meta-value {{
+                font-weight: bold;
+                color: #111;
+                text-align: right;
+            }}
+            
+            .section-title {{
+                background-color: #1a365d;
+                color: white;
+                font-size: 9.5pt;
+                font-weight: bold;
+                padding: 4px 8px;
+                margin-top: 10px;
+                margin-bottom: 6px;
+                text-transform: uppercase;
+            }}
+
+            .info-grid {{
+                display: table;
+                width: 100%;
+                margin-bottom: 10px;
+                font-size: 9.5pt;
+            }}
+            .info-col {{
+                display: table-cell;
+                width: 50%;
+                vertical-align: top;
+                padding-right: 15px;
+            }}
+            .info-row {{
+                display: table;
+                width: 100%;
+                margin-bottom: 3px;
+            }}
+            .info-key {{
+                display: table-cell;
+                width: 35%;
+                color: #555;
+                font-weight: 600;
+            }}
+            .info-val {{
+                display: table-cell;
+                width: 65%;
+                color: #111;
+            }}
+
+            .items-table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 8px;
+                margin-bottom: 15px;
+            }}
+            .items-table th {{
+                background-color: #1a365d;
+                color: white;
+                font-size: 9pt;
+                text-transform: uppercase;
+                padding: 6px 8px;
+                text-align: left;
+            }}
+            .items-table th.right, .items-table td.right {{
+                text-align: right;
+            }}
+            .items-table td {{
+                padding: 7px 8px;
+                font-size: 9.5pt;
+                border-bottom: 1px solid #e2e8f0;
+            }}
+
+            .totals-container {{
+                width: 100%;
+                margin-bottom: 15px;
+            }}
+            .totals-table {{
+                width: 320px;
+                margin-left: auto;
+                border-collapse: collapse;
+                font-size: 10pt;
+            }}
+            .totals-table td {{
+                padding: 4px 8px;
+            }}
+            .totals-label {{
+                text-align: right;
+                color: #333;
+                font-weight: 600;
+            }}
+            .totals-val {{
+                text-align: right;
+                font-weight: bold;
+                color: #111;
+            }}
+            .total-neto-row td {{
+                border-top: 2px solid #1a365d;
+                border-bottom: 2px solid #1a365d;
+                background-color: #f1f5f9;
+                font-size: 11pt;
+                color: #1a365d;
+                padding: 6px 8px;
+            }}
+
+            .terms-section {{
+                border-top: 1px solid #cbd5e1;
+                padding-top: 8px;
+                margin-top: 10px;
+            }}
+            .terms-title {{
+                font-size: 9pt;
+                font-weight: bold;
+                color: #1a365d;
+                margin-bottom: 4px;
+                text-transform: uppercase;
+            }}
+            .terms-list {{
+                font-size: 8pt;
+                color: #475569;
+                line-align: 1.4;
+            }}
+            .terms-list li {{
+                margin-left: 15px;
+                margin-bottom: 2px;
+            }}
+        </style>
+    </head>
+    <body>
+
+        <div class="header-container">
+            <div class="header-left">
+                <div class="company-title">GRUPO TRM LOGISTIC</div>
+                <div class="company-subtitle">Autotransporte Federal & Logística</div>
+            </div>
+            <div class="header-center">
+                <div class="logo-box">TRM</div>
+                <div class="logo-sub">Logistic del Bajío</div>
+            </div>
+            <div class="header-right">
+                <div class="cotizacion-title">Cotización</div>
+                <table class="meta-table">
+                    <tr>
+                        <td class="meta-label">Fecha:</td>
+                        <td class="meta-value">{fecha}</td>
+                    </tr>
+                    <tr>
+                        <td class="meta-label">Folio:</td>
+                        <td class="meta-value">{folio}</td>
+                    </tr>
+                    <tr>
+                        <td class="meta-label">Teléfono:</td>
+                        <td class="meta-value">4612324099</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="section-title">Datos del Cliente</div>
+        <div class="info-grid">
+            <div class="info-col">
+                <div class="info-row">
+                    <div class="info-key">Empresa / Cliente:</div>
+                    <div class="info-val">{cliente}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-key">Contacto:</div>
+                    <div class="info-val">{contacto}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-key">Correo:</div>
+                    <div class="info-val">{correo}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-key">Validez:</div>
+                    <div class="info-val">{validez}</div>
+                </div>
+            </div>
+            <div class="info-col">
+                <div class="info-row">
+                    <div class="info-key">Atención a Cliente:</div>
+                    <div class="info-val">Atención a Cliente General / Departamento de Logistica</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-key">Ruta:</div>
+                    <div class="info-val">{ruta_sel}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-key">Tipo de Viaje:</div>
+                    <div class="info-val">{tipo_viaje}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Especificaciones del Servicio</div>
+        
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">Item</th>
+                    <th style="width: 32%;">Descripción del Servicio</th>
+                    <th style="width: 25%;">Ruta / Detalles</th>
+                    <th style="width: 20%;">Tipo de Unidad</th>
+                    <th class="right" style="width: 15%;">Importe</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>01</td>
+                    <td>Servicio de Flete Terrestre de Carga</td>
+                    <td>{ruta_sel}</td>
+                    <td>{unidad_sel}</td>
+                    <td class="right">${subtotal:,.2f}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="totals-container">
+            <table class="totals-table">
+                <tr>
+                    <td class="totals-label">Subtotal:</td>
+                    <td class="totals-val">${subtotal:,.2f}</td>
+                </tr>
+                <tr>
+                    <td class="totals-label">IVA (16%):</td>
+                    <td class="totals-val">${iva:,.2f}</td>
+                </tr>
+                <tr>
+                    <td class="totals-label">Retención IVA (4%):</td>
+                    <td class="totals-val">-${retencion_iva:,.2f}</td>
+                </tr>
+                <tr class="total-neto-row">
+                    <td class="totals-label">TOTAL NETO:</td>
+                    <td class="totals-val">${total_neto:,.2f}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="terms-section">
+            <div class="terms-title">Condiciones Comerciales y Términos del Servicio</div>
+            <ul class="terms-list">
+                <li>Precios incluyen IVA</li>
+                <li>Libre de Maniobras: Servicio libre de maniobras de carga y descarga (a cargo del cliente).</li>
+                <li>Tiempos de Carga/Descarga: Incluye 3 hrs libres de carga y 3 hrs libres de descarga; tiempo extra genera estadía.</li>
+                <li>Seguro de Mercancía: La carga viaja por cuenta y riesgo del cliente salvo contratación explícita de póliza.</li>
+                <li>Condiciones de pago: Banco: BBVA BANCOMER Cuenta Cable: 012215001270598098 / Num de cuenta: 0127059809.</li>
+            </ul>
+        </div>
+
+    </body>
+    </html>
+    """
+
+  output_pdf = "cotizacion_grupo_trm.pdf"
+  HTML(string=html_content).write_pdf(output_pdf)
+  return output_pdf
 
 pdf_data = generar_pdf()
 
