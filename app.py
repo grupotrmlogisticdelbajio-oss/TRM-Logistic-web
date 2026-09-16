@@ -179,12 +179,11 @@ with col_izq:
 
     costo_viaje_redondo = ((flete_base_dinamico + costo_combustible_total + casetas_total + gastos_operativos) * 0.5) if tipo_viaje == "Redondo" else 0.0
 
-    subtotal_calculado = flete_base_dinamico + costo_combustible_total + casetas_total + gastos_operativos + costo_viaje_redondo
+subtotal_calculado = flete_base_dinamico + costo_combustible_total + casetas_total + gastos_operativos + costo_viaje_redondo
 subtotal = precio_manual if precio_manual > 0 else subtotal_calculado
-
-    iva = subtotal * 0.16
-    retencion_iva = subtotal * 0.04
-    total_neto = subtotal + iva - retencion_iva
+iva = subtotal * 0.16
+retencion_iva = subtotal * 0.04
+total_neto = subtotal + iva - retencion_iva
 
     st.markdown("---")
     st.header("2. Desglose de Cotización")
