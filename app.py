@@ -10,7 +10,7 @@ import io
 # Configurar la página en modo ancho para aprovechar las dos columnas
 st.set_page_config(layout="wide")
 
-st.title("GRUPO TRM LOGISTIC - Cotizador con Códigos Postales y PDF")
+st.title("GRUPO TRM LOGISTIC - Cotizador")
 
 excel_file = "TRM_Cotizador_.xlsm"
 
